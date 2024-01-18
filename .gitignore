@@ -1,0 +1,9 @@
+*.nii.gz
+*/logs/*
+*.mp4
+*.png
+*/__pycache__/*
+*.mat
+*/*.mat
+*.cfl
+*.hdr

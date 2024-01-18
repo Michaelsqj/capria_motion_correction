@@ -1,0 +1,1 @@
+/opt/fmrib/MATLAB/R2021a/bin/matlab -nojvm -nodisplay -r "cd('/home/fs0/qijia/code/moco/');include_path();adjust_thresh('/vols/Data/okell/qijia/raw_data_15-11-23/meas_MID00139_FID35127_t1_mpr_ax_iso_PSN_sens.mat',0.037,[])"

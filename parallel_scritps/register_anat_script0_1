@@ -1,0 +1,1 @@
+/opt/fmrib/MATLAB/R2021a/bin/matlab -nojvm -nodisplay -r "cd('/home/fs0/qijia/code/moco/'); include_path(); process_sens_mask('/vols/Data/okell/qijia/perf_recon_15-11-23/scan_4/mpr_sens')"

@@ -1,0 +1,4 @@
+/home/fs0/qijia/code/bart.sif pics -e -d 5 -i 100 -R W:7:0:0.0001  -B data/basis -t data/ktraj data/kdata data/sens data/rd_0001
+/home/fs0/qijia/code/bart.sif pics -e -d 5 -i 100 -R W:7:0:0.0001  -B data/balanced_basis -t data/ktraj data/kdata data/sens data/rd_0001_balanced
+/home/fs0/qijia/code/bart.sif pics -e -d 5 -i 100 -R W:7:0:0.0005  -B data/basis -t data/ktraj data/kdata data/sens data/rd_0005
+/home/fs0/qijia/code/bart.sif pics -e -d 5 -i 100 -R W:7:0:0.0005  -B data/balanced_basis -t data/ktraj data/kdata data/sens data/rd_0005_balanced

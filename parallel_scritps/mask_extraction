@@ -1,0 +1,2 @@
+bet /vols/Data/okell/qijia/recon_29-11-23/scan_3/anat2 /vols/Data/okell/qijia/recon_29-11-23/scan_3/anat2_brain -m
+bet /vols/Data/okell/qijia/perf_recon_29-11-23/scan_3/anat2 /vols/Data/okell/qijia/perf_recon_29-11-23/scan_3/anat2_brain -m

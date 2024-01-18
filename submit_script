@@ -1,0 +1,6 @@
+/opt/fmrib/MATLAB/R2021a/bin/matlab -nojvm -nodisplay -r "sim_invivo_motion('/vols/Data/okell/qijia/perf_recon_23-11-23/scan_1/perfusion_param_stage3.m')"
+/opt/fmrib/MATLAB/R2021a/bin/matlab -nojvm -nodisplay -r "sim_invivo_motion('/vols/Data/okell/qijia/perf_recon_23-11-23/scan_2/perfusion_param_stage3.m')"
+/opt/fmrib/MATLAB/R2021a/bin/matlab -nojvm -nodisplay -r "sim_invivo_motion('/vols/Data/okell/qijia/perf_recon_23-11-23/scan_3/perfusion_param_stage3.m')"
+/opt/fmrib/MATLAB/R2021a/bin/matlab -nojvm -nodisplay -r "sim_invivo_motion('/vols/Data/okell/qijia/perf_recon_23-11-23/scan_1/perfusion_param_gt.m')"
+/opt/fmrib/MATLAB/R2021a/bin/matlab -nojvm -nodisplay -r "sim_invivo_motion('/vols/Data/okell/qijia/perf_recon_23-11-23/scan_2/perfusion_param_gt.m')"
+/opt/fmrib/MATLAB/R2021a/bin/matlab -nojvm -nodisplay -r "sim_invivo_motion('/vols/Data/okell/qijia/perf_recon_23-11-23/scan_3/perfusion_param_gt.m')"
