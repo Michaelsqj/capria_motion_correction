@@ -13,10 +13,10 @@ function [S, I]=calc_flow_rate(param_folder, vessel_mask_path, bias_field_path)
     As = A(M);
     [img,~,scales,~,~] = read_avw([char(param_folder) '/mean_disp_p.nii.gz']);
     p = img;
-    ps = p(M)*0.5;
+    ps = p(M);
     [img,~,scales,~,~] = read_avw([char(param_folder) '/mean_disp_s.nii.gz']);
     s = img;
-    ss = s(M)*0.1;
+    ss = s(M);
     [img,~,scales,~,~] = read_avw([char(param_folder) '/mean_deltblood.nii.gz']);
     dt = img;
     dts = dt(M);
@@ -28,8 +28,8 @@ function [S, I]=calc_flow_rate(param_folder, vessel_mask_path, bias_field_path)
     eM = imerode(M, SE);
     S0 = mean(A(eM))/prod(scales)*1e3;
     % 3. Simulate a dynamic image I using DynAngioTheoreticalIntGammaDeltaTMin without RF attenuation with A,dt,s,p , the temporal resolution and other parameters are the same as what we used for generating dictionary for subspace.
-    tau = 0.0001;
-    [dMs] = simulate_angio(As, dts, ps, ss, 1, 1, tau); % dMs: Nt, Ns
+    tau = 0.001;
+    [dMs] = simulate_angio(As, dts, ps, ss, 144, 1, tau); % dMs: Nt, Ns
     
     % 4. We calculate the summation of simulated signal intensity within each frame and each vessel territory mask M_i , so we get S_i curve with temporal resolution same as the subspace temporal resolution.
     S = sum(dMs,2) / tau / S0; % Nt, 1

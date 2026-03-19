@@ -112,7 +112,7 @@ function [kdata, ktraj, p, image, kspace, base_k] = loadData(ind, fpath, p)
         kspace = load_sparkling(fpath, NCols, Nsegs, NPhases, Nshots, R, dead_ADC_pts, Ts, T);
         base_k = squeeze(kspace(:,1,:));
     else
-        base_g = load(fpath + "ktraj/" + gradname);
+        base_g = readmatrix(fpath + "ktraj/" + gradname);
         deadpts = ceil(dead_ADC_pts * Ts / 10e-3)
 
         base_g = [zeros(deadpts,3); base_g];

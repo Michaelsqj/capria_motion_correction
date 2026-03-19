@@ -1,6 +1,6 @@
 p.fpath                     = "/vols/Data/okell/qijia/raw_data_" + p.date + "/"
 p.outpath                   = "/vols/Data/okell/qijia/perf_recon_" + p.date + "/scan_" + num2str(p.ind) + "/subspace_motion_stage2/"
-p.outfile                   = p.outpath  + "/subspace_repeat"
+p.outfile                   = p.outpath  + "/coef"
 p.sens_path                 = "/vols/Data/okell/qijia/perf_recon_" + p.date + "/scan_" + num2str(p.ind)  + "/sens0.mat"
 % p.sens_path                 = "/vols/Data/okell/qijia/perf_recon_" + p.date + "/scan_" + num2str(p.ind)  + "/subspace_motion_stage1_rotated_sens0/sens_" + num2str(p.shot_ind) + ".mat"
 
@@ -15,7 +15,7 @@ p.mcf_mat                   = "/vols/Data/okell/qijia/perf_recon_" + p.date + "/
 % recon parameters 
 p.recon_type                = 3;
 p.subspace_path             = '/home/fs0/qijia/code/moco/subspace_utils/subspace_mat/subspace_T1_144_WE.mat';
-p.Nk                        = 2;
+p.Nk                        = 3;
 p.lambda                    = 1e-2;
 p.niter                     = 100;
 p.patch_size                = [5, 5, 5];

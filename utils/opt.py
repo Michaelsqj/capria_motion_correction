@@ -19,6 +19,7 @@ def options():
     parser.add_argument('--axis', type=int, help='0 horizontal, 1 vertical', required=False, default=0)
     parser.add_argument('--filetype', type=str, help='mp4/png', required=False, default='mp4')
     parser.add_argument('--mask', type=str, help='mask', required=False)
+    parser.add_argument('--slices', type=str, help='mask', required=False, default='')
     args = parser.parse_args()
 
     return args
@@ -30,4 +31,6 @@ def parse_list(roi, dtype='int'):
         r = [int(i) for i in roi.split(',')]
     elif dtype == 'float':
         r = [float(i) for i in roi.split(',')]
+    elif dtype == 'str':
+        r = [i for i in roi.split(',')]
     return r

@@ -1,6 +1,6 @@
 
 from opt import options, parse_list
-from utils import loadimg, concat_planes, scale2uint, mip, recover_subspace, crop_img
+from utils import loadimg, concat_planes_nd, scale2uint, mip, recover_subspace, crop_img
 import mat73
 import numpy as np
 import imageio as io
@@ -39,7 +39,19 @@ if __name__ == '__main__':
             tmpx = np.transpose(np.squeeze(mipx[::-1,::-1,i]))
             tmpy = np.transpose(np.squeeze(mipy[::-1,::-1,i]))
             tmpz = np.transpose(np.squeeze(mipz[::-1,:,i]))
-            mipout = concat_planes(tmpx, tmpy, tmpz, axis=args.axis)
+            # tmpx = np.transpose(np.squeeze(mipx[:,::-1,i]))
+            # tmpy = np.transpose(np.squeeze(mipy[:,::-1,i]))
+            # tmpz = np.transpose(np.squeeze(mipz[::-1,::-1,i]))
+            # parse the show_axis option
+            tmp_list = []
+            show_axis = parse_list(args.show_axis, 'str')
+            if 'x' in show_axis:
+                tmp_list.append(tmpx)
+            if 'y' in show_axis:
+                tmp_list.append(tmpy)
+            if 'z' in show_axis:
+                tmp_list.append(tmpz)
+            mipout = concat_planes_nd(tmp_list, axis=args.axis)
             # mipout = tmpz
             [vmin, vmax] = parse_list(args.vrange, 'float')
             vmin = vmin
@@ -48,7 +60,10 @@ if __name__ == '__main__':
             img_out.append(mipout)
 
     else:
-        c = np.floor(np.array(imgs.shape)/2).astype(int)
+        if args.slices == '':
+            c = np.floor(np.array(imgs.shape)/2).astype(int)
+        else:
+            c = parse_list(args.slices, 'int')
         # c[2] = 83
         imgx, imgy, imgz = imgs[c[0],:,:,:], imgs[:,c[1],:,:], imgs[:,:,c[2],:]
         img_out = []
@@ -56,17 +71,30 @@ if __name__ == '__main__':
             tmpx = np.transpose(np.squeeze(imgx[::-1,::-1,i]))
             tmpy = np.transpose(np.squeeze(imgy[::-1,::-1,i]))
             tmpz = np.transpose(np.squeeze(imgz[::-1,:,i]))
-            imgout = concat_planes(tmpx, tmpy, tmpz, axis=args.axis)
+            # tmpx = np.transpose(np.squeeze(imgx[:,::-1,i]))
+            # tmpy = np.transpose(np.squeeze(imgy[:,::-1,i]))
+            # tmpz = np.transpose(np.squeeze(imgz[::-1,::-1,i]))
+            # parse the show_axis option
+            show_axis = parse_list(args.show_axis, 'str')
+            tmp_list = []
+            if 'x' in show_axis:
+                tmp_list.append(tmpx)
+            if 'y' in show_axis:
+                tmp_list.append(tmpy)
+            if 'z' in show_axis:
+                tmp_list.append(tmpz)
+            imgout = concat_planes_nd(tmp_list, axis=args.axis)
+            # imgout = concat_planes(tmpx, tmpy, tmpz, axis=args.axis)
             # imgout = tmpz
             [vmin, vmax] = parse_list(args.vrange, 'float')
             vmin = vmin
-            vmax = vmax*np.max(tmpz)
+            vmax = vmax*np.max(imgout)
             imgout = scale2uint(imgout, [vmin,vmax])
             img_out.append(imgout)
     # 5. save the output
     if args.cmap == 'grey':
-        img_out = np.concatenate(img_out,axis=1-args.axis)
         if args.filetype != 'mp4':
+            img_out = np.concatenate(img_out,axis=1-args.axis)
             io.imwrite(args.outname+'.png',img_out)
         else:
-            io.mimsave(args.outname+'.mp4',img_out,macro_block_size=1)
+            io.mimsave(args.outname+'.mp4',img_out)

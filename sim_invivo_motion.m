@@ -84,14 +84,14 @@ function sim_invivo_motion(param_fpath, p)
 %----------------------------------
     if isfield(p, 'mcf_mat')
         if isfile(p.mcf_mat)
-            mats = load(p.mcf_mat);
+            mats = readmatrix(p.mcf_mat);
             mats = reshape(mats, 1, 4, 4);
             mats = repmat(mats, p.Navgs*p.Nshots, 1, 1);
         elseif isfolder(p.mcf_mat)
             mats = zeros([p.Navgs*p.Nshots, 4, 4]);
             for t=0:(p.Navgs*p.Nshots-1)
                 fname = sprintf('%s/MAT_%04d', p.mcf_mat, t);
-                mats(t+1,:,:) = load(fname);
+                mats(t+1,:,:) = readmatrix(fname);
             end
             mats = reshape(mats, p.Navgs, p.Nshots, 4, 4);
             if isfield(p, 'no_mismatch') && p.no_mismatch
@@ -109,6 +109,17 @@ function sim_invivo_motion(param_fpath, p)
         new_image = reshape(new_image, p.NCols, [],  p.Nshots, p.Navgs, p.NCoils);
     end
     new_kspace = new_kspace / p.kmax * pi;
+
+    %-------------------------
+    % Temporary experimental feature: reduce the number of shots
+    % image: NCols, Nsegs*NPhases, Nshots, Navgs, NCoils
+    % kspace: NCols, Nsegs*NPhases, Nshots, Navgs, 3
+    %-------------------------
+    if isfield(p, 'nshots_exps') && p.nshots_exps > 0
+        new_kspace = new_kspace(:,:,1:p.nshots_exps,:,:);
+        new_image = new_image(:,:,1:p.nshots_exps,:,:);
+        p.Nshots = p.nshots_exps;
+    end
 
     % reconstruction
     rd = reconstruct(new_kspace, new_image, p);

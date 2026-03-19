@@ -7,16 +7,16 @@ p.compress                  = 1;
 p.kspace_cutoff             = 1;
 p.recon_shape               = [186,196,150];
 
-
+p.Nt                        = 12;
 
 % motion parameters
 
 
 % recon parameters 
-p.recon_type                = 2;
-p.subspace_path             = '/home/fs0/qijia/code/moco/subspace_utils/subspace_mat/subspace_T1_144_WE.mat';
-p.Nk                        = 2;
-p.lambda                    = 1e-4;
-p.optalg                    = 'W';
+p.recon_type                = 10;
+p.optalg                    = "pogm_LLR_match"
+p.lambda                    = 7e-2;
+p.patch_size                = [5,5,5];
+p.niter                     = 200;
 
 p.save_complex              = true;

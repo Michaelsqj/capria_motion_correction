@@ -35,6 +35,15 @@ function [rd] = reconstruct(kspace, image, p)
                 return
             end
 
+            if p.optalg == "pogm_LLR_sub"
+                ktraj = cat(1, ktraj1, ktraj2);
+                kd    = cat(1, kd1, -kd2);
+                E     = xfm_NUFFT([p.recon_shape, p.NPhases], sens, [], ktraj, 'wi', 1);
+                dd    = E'*kd;
+                [rd]  = pogm_LLR_match(E, dd, p.lambda, p.patch_size, [E.Nd, E.Nt], p.niter);
+                return
+            end
+
             E1 = xfm_NUFFT([p.recon_shape, p.NPhases], sens, [], ktraj1, 'wi', 1);
             E2 = xfm_NUFFT([p.recon_shape, p.NPhases], sens, [], ktraj2, 'wi', 1);
             dd1 = E1'*kd1;
@@ -51,7 +60,7 @@ function [rd] = reconstruct(kspace, image, p)
                 [x1, x2] = pogm_LLR_split(E1, dd1, E2, dd2, p.lambda, p.patch_size, [E1.Nd, E1.Nt], p.niter);
                 rd = reshape(x1-x2, [E1.Nd, E1.Nt]);
             elseif p.optalg == "pogm_LLR_match"
-                [rd] = pogm_LLR_match(E1, dd1-dd2, p.lambda, p.patch_size, [E1.Nd, E1.Nt], p.niter);
+                [rd] = pogm_LLR_match(E1, dd1-dd2, p.lambda, p.patch_size, [E1.Nd, E1.Nt], p.niter);                
             else
                 error("optalg not existed")
             end
@@ -79,6 +88,14 @@ function [rd] = reconstruct(kspace, image, p)
                 dd = E' * kd;
                 rd = E.iter(dd, @pcg, 1e-4, p.niter, [1, 1, 1, 0]*p.lambda);   % 1e5
                 rd = reshape(rd, [E.Nd E.Nt]);
+            elseif p.optalg == "gridding-all"
+                kd = reshape(kd, [], 1, p.NCoils);
+                ktraj = reshape(ktraj, [], 1, 3);
+                E = xfm_NUFFT([p.recon_shape, 1], [], [], ktraj, 'PSF',1);
+                for nc=1:p.NCoils
+                    rd(:,:,:,:,nc) = reshape(E'*(E.w.*kd(:,:,nc)), [E.Nd, E.Nt]); 
+                end
+                rd = sum(rd.*conj(reshape(sens,[E.Nd,1,size(sens,4)])), 5 ) ./ sum(sens.*conj(sens),4);               
             else
                 error("optalg not existed")
             end
@@ -102,8 +119,8 @@ function [rd] = reconstruct(kspace, image, p)
             kd1 = reshape(permute(image(:,:,:,1,:), [1,3,2,5,4]),p.NCols, p.Nshots, p.Nsegs*p.NPhases, p.NCoils);
             kd2 = reshape(permute(image(:,:,:,2,:), [1,3,2,5,4]),p.NCols, p.Nshots, p.Nsegs*p.NPhases, p.NCoils);
             
-            ktraj = ktraj1;
-            kd = kd1;
+            ktraj = ktraj2;
+            kd = kd2;
             use_bart = true;
             if use_bart
                 % use bart l1 wavelet to reconstruct
@@ -181,13 +198,16 @@ function [rd] = reconstruct(kspace, image, p)
                         wi = 0; % no density compensation
                     end
                     [bpb, dd] = precompute(squeeze(ktraj(:,:,t,:)), squeeze(kd(:,:,t,:)), basis, p.recon_shape, sens, floor(p.recon_shape/2), wi);
-                    save_avw(abs(dd), char(p.outfile), 'd', [1,1,1]*p.res);
+                    % save_avw(abs(dd), char(p.outfile), 'd', [1,1,1]*p.res);
                     % assert 1==0
                     srd = pogm_LLR_sub(bpb, sens, dd, p.lambda, p.patch_size, [p.recon_shape, p.Nk], p.niter);
 
+                    rd = abs(srd);
+                    q = matfile(char([char(p.outfile) '.mat']), 'Writable', true);
+                    q.rd = srd;
                     % rd=reshape( reshape(srd,[],p.Nk) * basis', [p.recon_shape, p.Nsegs*p.NPhases] );
-                    ti = ceil(0.5*p.Nsegs*p.NPhases);
-                    rd(:,:,:,ii) = sum(srd .* reshape(basis(ti,:),[1,1,1,p.Nk]),4);
+                    % ti = ceil(0.5*p.Nsegs*p.NPhases);
+                    % rd(:,:,:,ii) = sum(srd .* reshape(basis(ti,:),[1,1,1,p.Nk]),4);
                     % clear srd bpb dd
                     % rd = squeeze(sum(srd .* reshape(basis',1,1,1,p.Nk,[]),4));
                 elseif use_bart && ~nosubspace
@@ -379,6 +399,29 @@ function [rd] = reconstruct(kspace, image, p)
                 [x1, x2] = pogm_LLR_mismatch_sens(Es1, dd1, Es2, dd2, p.lambda, p.patch_size, [p.recon_shape, p.NPhases], p.niter);
             end
             rd = reshape(x1-x2, [p.recon_shape, p.NPhases]);
+        case 10
+            load(p.sens_path, 'sens');
+
+            ktraj1 = reshape(permute(kspace(:,:,:,1,:), [1,3,2,5,4]), p.NCols, p.Nshots, p.Nsegs*p.NPhases, 3);
+            ktraj2 = reshape(permute(kspace(:,:,:,2,:), [1,3,2,5,4]), p.NCols, p.Nshots, p.Nsegs*p.NPhases, 3);
+            kd1 = reshape(permute(image(:,:,:,1,:), [1,3,2,5,4]),p.NCols, p.Nshots, p.Nsegs*p.NPhases, p.NCoils);
+            kd2 = reshape(permute(image(:,:,:,2,:), [1,3,2,5,4]),p.NCols, p.Nshots, p.Nsegs*p.NPhases, p.NCoils);
+            
+            ktraj = ktraj2;
+            kd = (kd1+kd2)/2;
+            NPhases = 6;
+            Nsegs = p.Nsegs * p.NPhases / NPhases;
+            ktraj = reshape(ktraj, [], NPhases, 3);
+            kd = reshape(kd, [], NPhases, p.NCoils);
+
+            E = xfm_NUFFT([p.recon_shape, NPhases], sens, [], ktraj, 'wi', 1);
+            dd = E'*kd;
+            [rd] = pogm_LLR_match(E, dd, p.lambda, p.patch_size, [E.Nd, E.Nt], p.niter);
+            if isfield(p, 'save_complex') && p.save_complex
+                q = matfile(char([p.outfile '.mat']), 'Writable', true);
+                q.basis = eye(NPhases);
+                q.rd = rd;
+            end
         otherwise
             error("recon_type not existed")
     end

@@ -69,17 +69,23 @@ def plot_par(param_list, parlabel_list):
 
 
 if __name__ == '__main__':
+    data_root="/vols/Data/okell/qijia/test_moco/cone_data_144_WE3"
+    # parname_list = [
+    #                 "/vols/Data/okell/qijia/test_moco/cone_data_144_WE2/raw_data_12-10-23_1.par.subspace_motion_stage1_combined_masked_mcf.mat.res.par",
+    #                 "/vols/Data/okell/qijia/test_moco/cone_data_144_WE2/raw_data_12-10-23_1.par.subspace_motion_stage2_combined_masked_flirt.mat.res.par",
+    #                 ]
     parname_list = [
-                    "/vols/Data/okell/qijia/test_moco/cone_data_144_WE2/raw_data_12-10-23_1.par.subspace_motion_stage1_combined_masked_mcf.mat.res.par",
-                    "/vols/Data/okell/qijia/test_moco/cone_data_144_WE2/raw_data_12-10-23_1.par.subspace_motion_stage2_combined_masked_flirt.mat.res.par",
-                    ]
-    parlabel_list = ["stage 1", "stage 2"]
+        f"{data_root}/raw_data_12-10-23_1.par",
+        f"{data_root}/raw_data_12-10-23_1.par.subspace_motion_stage2_combined_masked_flirt_combined.mat.res.par",
+        f"{data_root}/subspace_motion_stage1_gridding_mcf.par"
+    ]
+    parlabel_list = ["GT", "stage 1", "stage 2"]
     
     param_list = []
     for i, parname in enumerate(parname_list):
         par = np.loadtxt(parname)
         par[:,3:] = par[:,3:] - np.mean(par[:,3:], axis=0)
         param_list.append(par)
-        # if i > 0:
-        #     param_list[i] = param_list[i] - param_list[0]
+        if i > 0:
+            param_list[i] = param_list[i] - param_list[0]
     plot_par(param_list, parlabel_list)

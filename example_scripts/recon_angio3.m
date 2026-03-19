@@ -1,0 +1,9 @@
+% date: 1-12-23
+% cd('/home/fs0/qijia/code/moco/');p.mcf_mat='/vols/Data/okell/qijia/recon_1-12-23/scan_1/subspace_stage3_gridding_mcf.mat';p.date='1-12-23';p.ind=1;sim_invivo_motion('/home/fs0/qijia/code/moco//example_scripts/angio_param_stage3_gridding.m',p)
+% cd('/home/fs0/qijia/code/moco/');p.mcf_mat='/vols/Data/okell/qijia/recon_1-12-23/scan_2/subspace_stage3_gridding_mcf.mat';p.date='1-12-23';p.ind=2;sim_invivo_motion('/home/fs0/qijia/code/moco//example_scripts/angio_param_stage3_gridding.m',p)
+% date: 1-12-23_2
+% cd('/home/fs0/qijia/code/moco/');p.mcf_mat='/vols/Data/okell/qijia/recon_1-12-23_2/scan_1/subspace_stage3_gridding_mcf.mat';p.date='1-12-23_2';p.ind=1;sim_invivo_motion('/home/fs0/qijia/code/moco//example_scripts/angio_param_stage3_gridding.m',p)
+cd('/home/fs0/qijia/code/moco/');p.mcf_mat='/vols/Data/okell/qijia/recon_1-12-23_2/scan_2/subspace_stage3_gridding_mcf.mat';p.date='1-12-23_2';p.ind=2;sim_invivo_motion('/home/fs0/qijia/code/moco//example_scripts/angio_param_stage3_gridding.m',p)
+% date: 7-12-23
+cd('/home/fs0/qijia/code/moco/');p.mcf_mat='/vols/Data/okell/qijia/recon_7-12-23/scan_1/subspace_stage3_gridding_mcf.mat';p.date='7-12-23';p.ind=1;sim_invivo_motion('/home/fs0/qijia/code/moco//example_scripts/angio_param_stage3_gridding.m',p)
+cd('/home/fs0/qijia/code/moco/');p.mcf_mat='/vols/Data/okell/qijia/recon_7-12-23/scan_2/subspace_stage3_gridding_mcf.mat';p.date='7-12-23';p.ind=2;sim_invivo_motion('/home/fs0/qijia/code/moco//example_scripts/angio_param_stage3_gridding.m',p)

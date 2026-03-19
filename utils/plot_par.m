@@ -22,15 +22,21 @@ par_sense=par_sense-mean(par_sense,1);
 %%
 ind = 4;
 figure;
-plot(0:98,zeros(99,1),'k'); hold on;
+% plot(0:98,zeros(99,1),'k'); hold on;
 plot(par_gt(:,ind),'k', 'LineWidth', 2);hold on;
-% plot(par_combined(:,ind),'r','LineWidth',2);
-plot(par_split(:,ind)*0.75,'r','LineWidth',2);
+mse_gt = mean(par_gt(:,1:6).^2,'all').^0.5;
+
+plot(par_combined(:,ind),'r','LineWidth',2);
+mse_combined = mean(par_combined(:,1:6).^2,'all').^0.5;
+
+% plot(par_split(:,ind)*0.75,'r','LineWidth',2);
 plot(par_gridding(:,ind)*1.2,'b','LineWidth',2);
-plot(par_sense(:,ind),'m','LineWidth',2);
-% legend('ground truth','combined','split');
+mse_gridding = mean(par_gridding(:,1:6).^2*1.2.^2,'all').^0.5;
+
+% plot(par_sense(:,ind),'m','LineWidth',2);
+legend('ground truth','combined','gridding');
 set(gca,'FontSize',16);
-set(gca, 'box','off');
+% set(gca, 'box','off');
 % set graph width and height
 set(gcf, 'units','centimeters', 'Position', [0 0 20 10])
 saveas(gcf, 'par_plot', 'png')

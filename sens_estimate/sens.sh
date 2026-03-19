@@ -17,5 +17,5 @@ fpath="/vols/Data/okell/qijia/raw_data_${date}"
 flist=($(ls -1 ${fpath}/*anat.mat))
 echo ${flist}
 cd /home/fs0/qijia/code/SimTraj/MChiewCAPRIARecon/
-./qsens -n 1000 -t 0.001 -q short.q ${flist[0]}
+./qsens -n 1000 -t 0.001 -q veryshort.q ${flist[0]}
 cd ../Recon

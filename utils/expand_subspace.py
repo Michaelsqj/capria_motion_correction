@@ -12,6 +12,7 @@ if __name__ == '__main__':
     parser.add_argument('--index', type=int, help='index', required=False)
     parser.add_argument('--ref', type=str, help='ref', required=True)
     parser.add_argument('--scaling', type=float, help='scaling', required=False, default=1e6)
+    parser.add_argument('--outname', type=str, help='out', required=False, default=None)
     args = parser.parse_args()
 
     rd = mat73.loadmat(args.fname)['rd']
@@ -23,9 +24,14 @@ if __name__ == '__main__':
     print(basis.shape)
 
     ref_nii = nib.load(args.ref)
-
-    img = np.reshape(np.reshape(rd, (sx*sy*sz, nk)) @ basis.T, (sx, sy, sz, nt))
+    if args.index is not None:
+        img = np.reshape(np.reshape(rd, (sx*sy*sz, nk)) @ basis[args.index, :].T, (sx, sy, sz))
+    else:
+        img = np.reshape(np.reshape(rd, (sx*sy*sz, nk)) @ basis.T, (sx, sy, sz, nt))
 
     img_nii = nib.Nifti1Image(np.abs(img)*args.scaling, ref_nii.affine)
 
-    nib.save(img_nii, args.fname.replace('.mat', '.nii.gz'))
+    if args.outname is None:
+        nib.save(img_nii, args.fname.replace('.mat', '.nii.gz'))
+    else:
+        nib.save(img_nii, args.outname)

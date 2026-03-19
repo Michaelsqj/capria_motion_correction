@@ -25,9 +25,9 @@ do
     recon_path="/vols/Data/okell/qijia/recon_${date}"
     perf_recon_path="/vols/Data/okell/qijia/perf_recon_${date}"
 
-    step_ind=2
-    script_path="${recon_path}/mask_extraction"
-    rm ${script_path}
+    step_ind=3
+    # script_path="${recon_path}/mask_extraction"
+    # rm ${script_path}
     if [[ ${step_ind} -eq 1 ]]; then
         # 1. brain extraction for static_ind
         subfolder="scan_${static_ind}"
@@ -103,6 +103,67 @@ do
             echo $MATLABCMD \"$SUBCMD\" >> ${script_path}
             CMD="$FSLSUBCMD -q short.q -t ${script_path}"
             ID=$(eval $CMD)
+        done
+    fi
+
+    # 1. restore image at frame 62 from struct_stage3/struct_gt.mat subspace
+    # 2. flip the image
+    # 3. use mri_synthseg to segment struct_gt and struct_stage3
+    if [[ ${step_ind} -eq 3 ]]; then
+        PYTHONCMD="${HOME}/scratch/conda/envs/pytorch/bin/python"
+        
+        for ind in ${mov_inds[@]}
+        do
+            # 1. restore image at frame 62 from struct_stage3/struct_gt.mat subspace
+            code_path="/home/fs0/qijia/code/moco/utils/expand_subspace.py"
+            fname="${recon_path}/scan_${ind}/struct_stage3_gridding.mat"
+            index=62
+            ref="${recon_path}/scan_${ind}/struct_stage3_gridding.nii.gz"
+            scaling=1
+            outname="${recon_path}/scan_${ind}/struct_stage3_gridding_frame62"
+            CMD="${PYTHONCMD} ${code_path} --fname=${fname} --index=${index} --ref=${ref} --scaling=${scaling} --outname=${outname}.nii.gz"
+            SUBCMD="${FSLSUBCMD} -q short.q -s openmp,4 ${CMD}"
+            echo $CMD
+            ID=$(eval $SUBCMD)
+
+            # 2. flip the image
+            code_path="/home/fs0/qijia/code/moco/subspace_utils/flip_img.py"
+            infile="${outname}.nii.gz"
+            outfile="${outname}_flip.nii.gz"
+            CMD="${PYTHONCMD} ${code_path} --infile=${infile} --outfile=${outfile}"
+            SUBCMD="${FSLSUBCMD} -q short.q ${CMD}"
+            # ID=$(eval $SUBCMD)
+
+            # 3. segment brain
+            CMD="bet ${outfile} ${outname}_flip_brain"
+            SUBCMD="${FSLSUBCMD} -q short.q ${CMD}"
+            # ID=$(eval $SUBCMD)
+
+            # 3. use mri_synthseg to segment struct_gt and struct_stage3
+            CMD="fast ${outname}_flip_brain.nii.gz"
+            SUBCMD="${FSLSUBCMD} -q short.q -s openmp,4 ${CMD}"
+            # ID=$(eval $SUBCMD)
+        done
+
+    fi
+
+    if [[ ${step_ind} -eq 4 ]]; then
+        for ind in ${inds[@]}
+        do
+            # 1. extract vessel mask
+            code_path="/home/fs0/qijia/code/CAPRIAModel/"
+            recon_path="/vols/Data/okell/qijia/recon_${date}"
+            subfolder="scan_${ind}"
+            fpath="${recon_path}/${subfolder}/angio_stage3.nii.gz"
+            CMD="cd("${code_path}");p.thresh1 = 30;p.thresh2 = 0.1;p.thresh3 = 2;gen_angio_mask('${fpath}',p)"
+            SUBCMD="${FSLSUBCMD} -q short.q ${MATLABCMD} ${CMD}"
+            ID=$(eval $SUBCMD)
+
+            # 2. fit fabber model
+            # capria_modelfit_parallel(fpath, p, isprocessed)
+            CMD="capria_modelfit_parallel('${fpath}')"
+            SUBCMD="${FSLSUBCMD} -q short.q ${MATLABCMD} ${CMD}"
+            ID=$(eval $SUBCMD)
         done
     fi
 done

@@ -1,5 +1,5 @@
 *.nii.gz
-*/logs/*
+logs*
 *.mp4
 *.png
 */__pycache__/*

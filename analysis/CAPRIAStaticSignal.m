@@ -1,6 +1,6 @@
 % Calculate the CAPRIA static tissue signal (relative to M0)
 % function [Mxyav,Mxy,Mzminus] = CAPRIAStaticSignal(BGSMode,BGSParams,FAMode,FAParams,t0,T1,TR,Nsegs,Nphases)
-function [Mxy]                 = CAPRIAStaticSignal(BGSMode,BGSParams,FAMode,FAParams,t0,T1,TR,Nsegs,Nphases)
+function [Mxyav]                 = CAPRIAStaticSignal(BGSMode,BGSParams,FAMode,FAParams,t0,T1,TR,Nsegs,Nphases)
 
 
 % Find the number of TRs

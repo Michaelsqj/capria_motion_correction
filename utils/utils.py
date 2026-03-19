@@ -71,6 +71,19 @@ def concat_planes(mipx, mipy, mipz, axis=1):
 
     return mipout
 
+def concat_planes_nd(img_list, axis=1):
+    # img_list: list of images 2d
+    # axis: 0 horizontal, 1 vertical
+    sx, sy = max([img.shape[0] for img in img_list]), max([img.shape[1] for img in img_list])
+    pad_sx = [((sx-img.shape[0])//2, sx-img.shape[0]-(sx-img.shape[0])//2) for img in img_list]
+    pad_sy = [((sy-img.shape[1])//2, sy-img.shape[1]-(sy-img.shape[1])//2) for img in img_list]
+    if axis==0:
+        img_list = [np.pad(img, pad_width=((0,0),pad_sy[i])) for i, img in enumerate(img_list)]
+    else:
+        img_list = [np.pad(img, pad_width=(pad_sx[i],(0,0))) for i, img in enumerate(img_list)]
+    imgout = np.concatenate(img_list, axis=axis)
+    return imgout
+
 def concat_planes_2d(mipx, mipy, axis=1):
     sx = [mipx.shape[0], mipy.shape[0]]
     sy = [mipx.shape[1], mipy.shape[1]]

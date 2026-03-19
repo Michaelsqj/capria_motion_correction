@@ -14,7 +14,7 @@ CMD="${PYTHONCMD} ${plot_code} --mip --fname=${fname} --axis=0 --filetype=png --
 fname="/vols/Data/okell/qijia/bmrc/fast_mri_out/raw_data_16-2-23/radial/meas_radial_144_capria_12.nii.gz"
 CMD="${PYTHONCMD} ${plot_code} --mip --fname=${fname} --axis=0 --filetype=png  --troi=5\
       --vrange=0,0.2 --xroi=18,171 --yroi=20,176 --zroi=0,140"
-eval $CMD
+# eval $CMD
 fname="/vols/Data/okell/qijia/bmrc/fast_mri_out/raw_data_16-2-23/cone/meas_cone_144_subspace_Nt144_Nk12_randomdict_L_balance_0_lambda_0.0005_AngioFitting/fabber_out/vessel_sig_1.nii.gz"
 CMD="${PYTHONCMD} ${plot_code} --mip --fname=${fname} --axis=1 --filetype=mp4\
       --vrange=0,0.8"
@@ -31,21 +31,27 @@ recon_path="/vols/Data/okell/qijia/recon_${date}"
 perf_recon_path="/vols/Data/okell/qijia/perf_recon_${date}"
 subfolder="scan_${ind}"
 # fname="${perf_recon_path}/${subfolder}/perfusion_stage3.nii.gz"
-fname="${perf_recon_path}/${subfolder}/perfusion_gt.nii.gz"
-CMD="${PYTHONCMD} ${plot_code} --fname=${fname} --axis=0 --filetype=png --troi=0,1,2,3,4,5\
+# fname="${perf_recon_path}/${subfolder}/perfusion_gt.nii.gz"
+# CMD="${PYTHONCMD} ${plot_code} --fname=${fname} --axis=0 --filetype=png --troi=0,1,2,3,4,5\
+    # --vrange=0,0.4"
+fname="/vols/Data/okell/qijia/perf_recon_8-12-23/meas_MID00143_FID02580_qijia_CV_VEPCASL_WE_fullg_johnson_45_256_diff_LLR_avg1-0.05-5_1.nii.gz"
+CMD="${PYTHONCMD} ${plot_code} --fname=${fname} --axis=1 --filetype=mp4\
     --vrange=0,0.4"
-# eval $CMD
+eval $CMD
 
 # angiogram 
-fname="${recon_path}/${subfolder}/angio_stage3.nii.gz"
+# fname="${recon_path}/${subfolder}/angio_stage3.nii.gz"
 # fname="${recon_path}/${subfolder}/angio_gt.nii.gz"
-CMD="${PYTHONCMD} ${plot_code} --fname=${fname} --axis=0 --mip --filetype=png --troi=0,2,4,6,8,10\
-    --vrange=0,0.8 --xroi=18,171 --yroi=30,186 --zroi=10,135"
+# CMD="${PYTHONCMD} ${plot_code} --fname=${fname} --axis=0 --mip --filetype=png --troi=0,2,4,6,8,10\
+#     --vrange=0,0.8 --xroi=18,171 --yroi=30,186 --zroi=10,135"
+fname="/vols/Data/okell/qijia/recon_8-12-23/meas_MID00143_FID02580_qijia_CV_VEPCASL_WE_fullg_johnson_45_256_diff_LLR_avg1-0.1-5_1.nii.gz"
+CMD="${PYTHONCMD} ${plot_code} --fname=${fname} --axis=1 --mip --filetype=mp4\
+    --vrange=0,0.5"
 # eval $CMD
 
 # fname="${recon_path}/${subfolder}/struct_stage3.mat"
 fname="${recon_path}/${subfolder}/struct_gt.mat"
-CMD="${PYTHONCMD} ${plot_code} --fname=${fname} --axis=0 --subspace --filetype=png --troi=86\
+CMD="${PYTHONCMD} ${plot_code} --fname=${fname} --axis=1 --subspace --filetype=png --troi=86\
     --vrange=0,1"
 # eval $CMD
 
@@ -56,28 +62,30 @@ CMD="${PYTHONCMD} ${plot_code} --fname=${fname} --axis=0 --subspace --filetype=p
     --vrange=0,1 --xroi=18,171"
 
 # 4. plot parameter maps
-# fname="/vols/Data/okell/qijia/bmrc/fast_mri_out/raw_data_16-2-23/cone/meas_cone_144_subspace_Nt144_Nk12_randomdict_L_balance_0_lambda_0.0005_AngioFitting/fabber_out/"
-fname="/vols/Data/okell/qijia/bmrc/fast_mri_out/raw_data_16-2-23/radial/meas_radial_144_subspace_Nt144_Nk12_randomdict_L_balance_0_lambda_0.0005_AngioFitting/fabber_out/"
+# fname="/vols/Data/okell/qijia/bmrc/fast_mri_out/raw_data_16-2-23/cone/meas_cone_144_capria_12_AngioFitting/fabber_out/"
+fname="/vols/Data/okell/qijia/bmrc/fast_mri_out/raw_data_16-2-23/cone/meas_cone_144_subspace_Nt144_Nk12_randomdict_L_balance_0_lambda_0.0005_AngioFitting/fabber_out/"
 # maskname="/vols/Data/okell/qijia/bmrc/fast_mri_out/raw_data_16-2-23/cone/mask_clusters_bin.nii.gz"
-maskname="/vols/Data/okell/qijia/bmrc/fast_mri_out/raw_data_16-2-23/radial/meas_radial_144_capria_12_AngioFitting/mask_clusters_bin.nii.gz"
+maskname='/vols/Data/okell/qijia/bmrc/fast_mri_out/raw_data_16-2-23/cone/meas_cone_144_subspace_Nt144_Nk12_randomdict_L_balance_0_lambda_0.0005_AngioFitting/fabber_out/dt_mask.nii.gz'
+# maskname="/vols/Data/okell/qijia/bmrc/fast_mri_out/raw_data_16-2-23/radial/meas_radial_144_capria_12_AngioFitting/mask_clusters_bin.nii.gz"
+plot_code="/home/fs0/qijia/code/moco/utils/paramap.py"
+# CMD="${PYTHONCMD} ${plot_code} --mip --fname=${fname}/mean_deltblood.nii.gz --axis=0 --filetype=png \
+#     --vrange=1e-3,1.8 --xroi=18,171 --yroi=20,176 --zroi=10,130 --cmap=actc.cmap --mask=${maskname}"
+# CMD="${PYTHONCMD} ${plot_code} --mip --fname=${fname}/mean_disp_p.nii.gz --axis=0 --filetype=png \
+#     --vrange=0,0.5 --xroi=18,171 --yroi=20,176 --zroi=10,130 --cmap=6bluegrn.cmap --mask=${maskname}"
+CMD="${PYTHONCMD} ${plot_code} --mip --fname=${fname}/mean_disp_s.nii.gz --axis=0 --filetype=png\
+    --vrange=1,10 --xroi=18,171 --yroi=20,176 --zroi=10,130 --cmap=6bluegrn.cmap --mask=${maskname}"
+# eval $CMD
+
+fname="/vols/Data/okell/qijia/bmrc/fast_mri_out/raw_data_16-2-23/cone/meas_cone_144_capria_12_AngioFitting/fabber_out/"
+maskname='/vols/Data/okell/qijia/bmrc/fast_mri_out/raw_data_16-2-23/cone/meas_cone_144_subspace_Nt144_Nk12_randomdict_L_balance_0_lambda_0.0005_AngioFitting/fabber_out/dt_mask.nii.gz'
+# fname="/vols/Data/okell/qijia/bmrc/fast_mri_out/raw_data_16-2-23/radial/meas_radial_144_capria_12_AngioFitting/fabber_out/"
+# maskname="/vols/Data/okell/qijia/bmrc/fast_mri_out/raw_data_16-2-23/cone/mask_clusters_bin.nii.gz"
+# maskname="/vols/Data/okell/qijia/bmrc/fast_mri_out/raw_data_16-2-23/radial/mask_clusters_bin.nii.gz"
 plot_code="/home/fs0/qijia/code/moco/utils/paramap.py"
 # CMD="${PYTHONCMD} ${plot_code} --mip --fname=${fname}/mean_deltblood.nii.gz --axis=0 --filetype=png  \
 #     --vrange=1e-3,1.8 --xroi=18,171 --yroi=20,176 --zroi=10,130 --cmap=actc.cmap --mask=${maskname}"
 # CMD="${PYTHONCMD} ${plot_code} --mip --fname=${fname}/mean_disp_p.nii.gz --axis=0 --filetype=png  \
 #     --vrange=0,0.5 --xroi=18,171 --yroi=20,176 --zroi=10,130 --cmap=6bluegrn.cmap --mask=${maskname}"
-CMD="${PYTHONCMD} ${plot_code} --mip --fname=${fname}/mean_disp_s.nii.gz --axis=0 --filetype=png  \
-    --vrange=1,10 --xroi=18,171 --yroi=20,176 --zroi=10,130 --cmap=6bluegrn.cmap --mask=${maskname}"
-# eval $CMD
-
-# fname="/vols/Data/okell/qijia/bmrc/fast_mri_out/raw_data_16-2-23/cone/meas_cone_144_capria_12_AngioFitting/fabber_out/"
-fname="/vols/Data/okell/qijia/bmrc/fast_mri_out/raw_data_16-2-23/radial/meas_radial_144_capria_12_AngioFitting/fabber_out/"
-# maskname="/vols/Data/okell/qijia/bmrc/fast_mri_out/raw_data_16-2-23/cone/mask_clusters_bin.nii.gz"
-# maskname="/vols/Data/okell/qijia/bmrc/fast_mri_out/raw_data_16-2-23/radial/mask_clusters_bin.nii.gz"
-plot_code="/home/fs0/qijia/code/moco/utils/paramap.py"
-CMD="${PYTHONCMD} ${plot_code} --mip --fname=${fname}/mean_deltblood.nii.gz --axis=0 --filetype=png  \
-    --vrange=1e-3,1.8 --xroi=18,171 --yroi=20,176 --zroi=10,130 --cmap=actc.cmap --mask=${maskname}"
-CMD="${PYTHONCMD} ${plot_code} --mip --fname=${fname}/mean_disp_p.nii.gz --axis=0 --filetype=png  \
-    --vrange=0,0.5 --xroi=18,171 --yroi=20,176 --zroi=10,130 --cmap=6bluegrn.cmap --mask=${maskname}"
 CMD="${PYTHONCMD} ${plot_code} --mip --fname=${fname}/mean_disp_s.nii.gz --axis=0 --filetype=png  \
     --vrange=1,10 --xroi=18,171 --yroi=20,176 --zroi=10,130 --cmap=6bluegrn.cmap --mask=${maskname}"
 # eval $CMD

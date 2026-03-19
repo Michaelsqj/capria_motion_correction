@@ -1,10 +1,19 @@
 # Define the parameters for the reconstruction pipeline
 FSLSUBCMD="$FSLDIR/bin/fsl_sub -m n -l logs"
-MATLABCMD="/opt/fmrib/MATLAB/R2021a/bin/matlab -nojvm -nodisplay -r"
+# if hostname starts with clcpu then
+if [[ $(hostname) == clcpu* ]]; then
+    MATLABCMD="/cvmfs/matlab.fmrib.ox.ac.uk/MATLAB/R2023b/bin/matlab -nojvm -nodisplay -r"
+elif [[ $(hostname) == jalapeno* ]]; then
+    # else if hostname starts with jalapeno then
+    MATLABCMD="/opt/fmrib/MATLAB/R2023a/bin/matlab -nojvm -nodisplay -r"
+fi
+
+# MATLABCMD="/opt/fmrib/MATLAB/R2021a/bin/matlab -nojvm -nodisplay -r"
 code_path="/home/fs0/qijia/code/moco/"
 # date: "15-11-23" "23-11-23" "28-11-23" "29-11-23" "30-11-23" "1-12-23" "1-12-23_2" "7-12-23"
 # date="28-11-23"
-for date in "15-11-23"
+# for date in "15-11-23" "23-11-23" "28-11-23" "29-11-23" "30-11-23" "1-12-23" "1-12-23_2" "7-12-23"
+for date in "30-11-23"
 do
     echo "date: ${date}"
     
@@ -19,7 +28,8 @@ do
     fi
     # mov_inds=(1 2)  # moving scan index
     # static_ind=3    # static scan index
-    inds=(${mov_inds[@]} ${static_ind[@]})
+    # inds=(${mov_inds[@]} ${static_ind[@]})
+    inds=(${static_ind})
     # inds=${mov_inds[@]}
     
 
@@ -36,7 +46,7 @@ do
         mkdir -p ${perf_recon_path}/scan_${ind}
     done
 
-    step_ind=12
+    step_ind=4
     #-----------------------------------------------------
     # Stage 0: reconstruct anat (perf/angi) for all scans, and reconstruct mprage t
     #           estimate coils sensitivity for all scans and mprage t1
@@ -101,44 +111,51 @@ do
         # !!!!manual
         # adjust thresh mprage t1 and angio
         fpath="/vols/Data/okell/qijia/raw_data_${date}"
-        flist=($(ls -1 ${fpath}/*PSN_sens.mat))
-        SUBCMD="cd('${code_path}');include_path();adjust_thresh('${flist[0]}',0.037,[])"
-        echo $MATLABCMD \"$SUBCMD\" >> ${code_path}/parallel_scritps/register_anat_script0
-        CMD="$FSLSUBCMD -q short.q -t ${code_path}/parallel_scritps/register_anat_script0"
-        ID=$(eval $CMD)
+        # flist=($(ls -1 ${fpath}/*PSN_sens.mat))
+        # SUBCMD="cd('${code_path}');include_path();adjust_thresh('${flist[0]}',0.037,[])"
+        # echo $MATLABCMD \"$SUBCMD\" >> ${code_path}/parallel_scritps/register_anat_script0
+        # CMD="$FSLSUBCMD -q short.q -t ${code_path}/parallel_scritps/register_anat_script0"
+        # ID=$(eval $CMD)
 
-        # extract first sens frame using fslroi
-        flist=($(ls -1 ${fpath}/*PSN_sens.nii.gz))
-        sensname="${flist[0]}"
-        sens0name=${sensname/sens/sens_0}
-        SUBCMD="fslroi ${sensname} ${sens0name} 0 1"
-        CMD="$FSLSUBCMD -q short.q -j ${ID} $SUBCMD"
-        ID=$(eval $CMD)
+        # # extract first sens frame using fslroi
+        # flist=($(ls -1 ${fpath}/*PSN_sens.nii.gz))
+        # sensname="${flist[0]}"
+        # sens0name=${sensname/sens/sens_0}
+        # SUBCMD="fslroi ${sensname} ${sens0name} 0 1"
+        # CMD="$FSLSUBCMD -q short.q -j ${ID} $SUBCMD"
+        # ID=$(eval $CMD)
+
+        # # register mprage t1 to anat (perf/angi)
+        # flist=($(ls -1 ${fpath}/*PSN_anat.nii.gz))
+        # anatname="${flist[0]}"
+        # SUBCMD="flirt -in ${anatname} -ref ${perf_recon_path}/scan_${static_ind}/anat0 -out ${perf_recon_path}/scan_${static_ind}/mpr_anat -omat ${perf_recon_path}/scan_${static_ind}/mpr2anat_regxfm -dof 6"
+        # CMD="$FSLSUBCMD -q short.q -j ${ID} $SUBCMD"
+        # ID=$(eval $CMD)
 
         # register mprage t1 to anat (perf/angi)
         flist=($(ls -1 ${fpath}/*PSN_anat.nii.gz))
         anatname="${flist[0]}"
-        SUBCMD="flirt -in ${anatname} -ref ${perf_recon_path}/scan_${static_ind}/anat0 -out ${perf_recon_path}/scan_${static_ind}/mpr_anat -omat ${perf_recon_path}/scan_${static_ind}/mpr2anat_regxfm -dof 6"
-        CMD="$FSLSUBCMD -q short.q -j ${ID} $SUBCMD"
+        SUBCMD="flirt -in ${anatname} -ref ${recon_path}/scan_${static_ind}/anat0 -out ${recon_path}/scan_${static_ind}/mpr_anat -omat ${recon_path}/scan_${static_ind}/mpr2anat_regxfm -dof 6"
+        CMD="$FSLSUBCMD -q short.q $SUBCMD"
         ID=$(eval $CMD)
         
-        # apply xfm to sens0
-        SUBCMD="flirt -in ${sens0name} -ref ${perf_recon_path}/scan_${static_ind}/anat0 -out ${perf_recon_path}/scan_${static_ind}/mpr_sens -applyxfm -init ${perf_recon_path}/scan_${static_ind}/mpr2anat_regxfm"
-        CMD="$FSLSUBCMD -q short.q -j ${ID} $SUBCMD"
-        ID=$(eval $CMD)
+        # # apply xfm to sens0
+        # SUBCMD="flirt -in ${sens0name} -ref ${perf_recon_path}/scan_${static_ind}/anat0 -out ${perf_recon_path}/scan_${static_ind}/mpr_sens -applyxfm -init ${perf_recon_path}/scan_${static_ind}/mpr2anat_regxfm"
+        # CMD="$FSLSUBCMD -q short.q -j ${ID} $SUBCMD"
+        # ID=$(eval $CMD)
 
-        # binarize and process mpr_sens
-        SUBCMD="cd('${code_path}'); include_path(); process_sens_mask('${perf_recon_path}/scan_${static_ind}/mpr_sens')"
-        echo $MATLABCMD \"$SUBCMD\" > ${code_path}/parallel_scritps/register_anat_script0_1
-        CMD="$FSLSUBCMD -q short.q -j ${ID} -t ${code_path}/parallel_scritps/register_anat_script0_1"
-        ID=$(eval $CMD)
+        # # binarize and process mpr_sens
+        # SUBCMD="cd('${code_path}'); include_path(); process_sens_mask('${perf_recon_path}/scan_${static_ind}/mpr_sens')"
+        # echo $MATLABCMD \"$SUBCMD\" > ${code_path}/parallel_scritps/register_anat_script0_1
+        # CMD="$FSLSUBCMD -q short.q -j ${ID} -t ${code_path}/parallel_scritps/register_anat_script0_1"
+        # ID=$(eval $CMD)
 
-        for ind in ${mov_inds[@]}
-        do
-            SUBCMD="cp ${perf_recon_path}/scan_${static_ind}/mpr_sens_mask.nii.gz ${perf_recon_path}/scan_${ind}/mpr_sens_mask.nii.gz"
-            CMD="$FSLSUBCMD -q short.q -j ${ID} $SUBCMD"
-            ID=$(eval $CMD)
-        done
+        # for ind in ${mov_inds[@]}
+        # do
+        #     SUBCMD="cp ${perf_recon_path}/scan_${static_ind}/mpr_sens_mask.nii.gz ${perf_recon_path}/scan_${ind}/mpr_sens_mask.nii.gz"
+        #     CMD="$FSLSUBCMD -q short.q -j ${ID} $SUBCMD"
+        #     ID=$(eval $CMD)
+        # done
     fi
 
 
