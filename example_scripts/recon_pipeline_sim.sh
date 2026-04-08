@@ -45,7 +45,7 @@ fi
 # 2. estimate coil sensitivity for three scans, estimate coil sensitivity for mprage t1
 if [[ ${step_ind} -eq 2 ]]; then
     cwd=$(pwd)
-    cd /home/fs0/qijia/code/SimTraj/MChiewCAPRIARecon/
+    cd "${code_path}/external/MChiewCAPRIARecon/"
     for i in ${inds[@]}
     do
         fpath="${perf_recon_path}/scan_${i}"

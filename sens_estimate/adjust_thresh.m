@@ -7,7 +7,9 @@ function adjust_thresh(fpath, thresh, res)
     if isempty(res)
         res = [1.718750,1.718750,1.7];
     end
-    addpath('/home/fs0/qijia/code/SimTraj/MChiewCAPRIARecon/')
+    root_dir = fileparts(fileparts(mfilename('fullpath')));
+    recon_dir = fullfile(root_dir, 'external', 'MChiewCAPRIARecon');
+    addpath(recon_dir)
     [dirname sensname ext] = fileparts(fpath);
     anatname = strrep(sensname, 'sens','anat')
     anatfile=[dirname '/' anatname]
@@ -18,5 +20,5 @@ function adjust_thresh(fpath, thresh, res)
     [img,~,scales,~,~]=read_avw(sensfile);
     save_avw(img,sensfile,'d',res);
     % save_avw(img,sensfile,'d',[1 1 1]*3.409100);
-    rmpath('/home/fs0/qijia/code/SimTraj/MChiewCAPRIARecon/')
+    rmpath(recon_dir)
 end

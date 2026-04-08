@@ -1,6 +1,9 @@
 function gen_subspace_perf()
-    addpath("/home/fs0/qijia/code/subspace/CAPRIAModel")
-    addpath("/home/fs0/qijia/code/SimTraj/MChiewCAPRIARecon")
+    root_dir = fileparts(fileparts(mfilename('fullpath')));
+    capria_model_dir = fullfile(root_dir, 'external', 'CAPRIAModel');
+    addpath(capria_model_dir)
+    recon_dir = fullfile(root_dir, 'external', 'MChiewCAPRIARecon');
+    addpath(recon_dir)
     % simulation
     Nsegs = 36;
     Nphases = 6;
@@ -54,6 +57,6 @@ function [dMAv] = capria_sim(Nsegs, Nphases)
         params.Deltat = delta_ts(ii);
         [dM(:,ii), VFA_Alpha, ~, ~, tAv, dMAv(:,ii)] = CAPRIASignal('perf',FAMode,VFAParams,t,t0,tau,T1b,TR,params,false,true,Nsegs,Nphases,false);
     end
-    rmpath("/home/fs0/qijia/code/subspace/CAPRIAModel")
-    rmpath("/home/fs0/qijia/code/SimTraj/MChiewCAPRIARecon")
+    rmpath(capria_model_dir)
+    rmpath(recon_dir)
 end

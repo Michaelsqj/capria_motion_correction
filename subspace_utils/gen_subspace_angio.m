@@ -1,6 +1,8 @@
 function gen_subspace()
-    addpath("/home/fs0/qijia/code/subspace/CAPRIAModel")
-    addpath("/home/fs0/qijia/code/SimTraj/MChiewCAPRIARecon")
+    root_dir = fileparts(fileparts(mfilename('fullpath')));
+    capria_model_dir = fullfile(root_dir, 'external', 'CAPRIAModel');
+    addpath(capria_model_dir)
+    addpath(fullfile(root_dir, 'external', 'MChiewCAPRIARecon'))
     % simulation
     Nsegs = 3;
     Nphases = 48;

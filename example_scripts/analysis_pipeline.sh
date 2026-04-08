@@ -151,7 +151,7 @@ do
         for ind in ${inds[@]}
         do
             # 1. extract vessel mask
-            code_path="/home/fs0/qijia/code/CAPRIAModel/"
+            code_path="/home/fs0/qijia/code/moco/external/CAPRIAModel/"
             recon_path="/vols/Data/okell/qijia/recon_${date}"
             subfolder="scan_${ind}"
             fpath="${recon_path}/${subfolder}/angio_stage3.nii.gz"

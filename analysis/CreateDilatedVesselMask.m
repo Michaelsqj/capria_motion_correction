@@ -1,5 +1,6 @@
 function CreateDilatedVesselMask(DataPath, AngioVesMaskName,AngioDilVesMaskName,BMaskName)
-    addpath('/home/fs0/qijia/code/CAPRIAModel')
+    root_dir = fileparts(fileparts(mfilename('fullpath')));
+    addpath(fullfile(root_dir, 'external', 'CAPRIAModel'))
     % First average the CFA and VFA data sets to be fair
     % clear Data
     % Data(:,:,:,:,1) = ra('../CAPRIA_Recon/CFA_Angio/resS.nii.gz');

@@ -1,7 +1,8 @@
 function [S, I]=calc_flow_rate(param_folder, vessel_mask_path, bias_field_path)
     % 1. Estimate A, dt, s, p within vessel mask M
     %    load in, alreay estimated here
-    addpath('/home/fs0/qijia/code/CAPRIAModel')
+    root_dir = fileparts(fileparts(mfilename('fullpath')));
+    addpath(fullfile(root_dir, 'external', 'CAPRIAModel'))
     addpath('/home/fs0/qijia/code/DynAngioQuant/Dynamic_Angio')
     [img,~,scales,~,~] = read_avw(char(vessel_mask_path));
     M = logical(img);

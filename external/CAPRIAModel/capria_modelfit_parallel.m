@@ -1,4 +1,4 @@
-function fit_capria_angio_parallel(fpath, p, isprocessed)
+function capria_modelfit_parallel(fpath, p, isprocessed)
     % CAPRIA_MODELFIT_PARALLEL(fpath, prot_type, thresh, end_early)
     %   fpath: path to the data
     %   p: parameters
@@ -21,11 +21,9 @@ function fit_capria_angio_parallel(fpath, p, isprocessed)
     %   4. save the results to the output_i folder
     %   5. merge the results to the data processing folder
     %   6. delete the output_i folder
-
-    root_dir = fileparts(fileparts(mfilename('fullpath')));
-    addpath(fullfile(root_dir, 'external', 'CAPRIAModel'))
-    
-    % 1. preprocess data
+    if nargin<2
+        p.prot_type=0;
+    end
     [dirname,name,ext] = fileparts(fpath)
     name = char(name);
     name = name(1:end-length('.nii'));
@@ -34,8 +32,18 @@ function fit_capria_angio_parallel(fpath, p, isprocessed)
     outpath = char(name+"_AngioFitting")
     mkdir([char(dirname) '/' char(outpath)])
     cd([char(dirname) '/' char(outpath)])
-
+    addpath('/home/fs0/qijia/code/CAPRIAModel')
+    
     if nargin==3 && ~isprocessed     % else just directly use the mask_clusters_bin
+            % 1. preprocess data
+        [dirname,name,ext] = fileparts(fpath)
+        name = char(name);
+        name = name(1:end-length('.nii'));
+        ext = ".nii.gz";
+        fname = name + ext
+        outpath = char(name+"_AngioFitting")
+        mkdir([char(dirname) '/' char(outpath)])
+        cd([char(dirname) '/' char(outpath)])
         % 1.1 Rescale the data to prevent premature fitting stops
         tosystem(['fslmaths ../', char(fname), ' -mul 1e10 data'])
 
@@ -52,6 +60,18 @@ function fit_capria_angio_parallel(fpath, p, isprocessed)
         tosystem(['fslmaths mask_clusters -thr ' thr ' -bin mask_clusters_bin'])
     % elseif ~isfile('mask_clusters_bin.nii.gz')
     %     error('mask_clusters_bin.nii.gz not found')
+    else
+        if ~isfile('data.nii.gz')
+          tosystem(['fslmaths ', char(fpath), ' -mul 1e7 data'])
+        end
+%         cd(fpath)
+        if isfile('mask_clusters_bin.nii.gz')
+            mask_cluster_bin_path = 'mask_clusters_bin';
+        elseif isfile('../mask_clusters_bin.nii.gz')
+            mask_cluster_bin_path = '../mask_clusters_bin.nii.gz';
+        else
+            mask_cluster_bin_path = p.mask_path;
+        end
     end
 
     %% Set up some example parameters
@@ -61,8 +81,8 @@ function fit_capria_angio_parallel(fpath, p, isprocessed)
             TR = 14.7e-3; Nsegs = 12; Nphases = 12; VFAParams = [3 12];
         case 1  % radial previous protocol
             TR = 9.8e-3;  Nsegs=18; Nphases = 12; VFAParams = [2 9];
-        case 2  % water excitation cone
-            TR = 16e-3;  Nsegs=12; Nphases = 12; VFAParams = [3 12];
+        case 2 % cone cut off on time dimension
+            TR = 14.7e-3; Nsegs = 12; Nphases = 7; VFAParams = [3 12];
     end
 
     % Calculate the time of the start of imaging, accounting for spoilers etc. 
@@ -71,7 +91,7 @@ function fit_capria_angio_parallel(fpath, p, isprocessed)
     % Calculate a time array - note this must be separated by TR for the
     % following model to work correctly
     t = t0:TR:(t0+(Nsegs*Nphases-1)*TR);
-    [status,cmdout] = system(['fslinfo ' char(fpath)]); cmdouts = strsplit(cmdout,'\s','DelimiterType','RegularExpression');
+    [status,cmdout] = system('fslinfo data.nii.gz'); cmdouts = strsplit(cmdout,'\s','DelimiterType','RegularExpression');
     Nt = str2double(cmdouts{1,10})
     Nsegs = Nsegs*Nphases / Nt;
     Nphases = Nt;
@@ -87,6 +107,7 @@ function fit_capria_angio_parallel(fpath, p, isprocessed)
     %% Parallel fitting
     fid0 = fopen('parallel_script.sh','w');
     FSLSUBCMD=['fsl_sub -m n -l logs -q short.q '];
+    PYTHONCMD='/home/fs0/qijia/scratch/conda/envs/pytorch/bin/python';
     % 1. create the output_i folder 
     fid = fopen('create_output_script','w')
     for i=1:100
@@ -101,11 +122,23 @@ function fit_capria_angio_parallel(fpath, p, isprocessed)
     mask_path='/vols/Data/okell/qijia/test_fabber/masks/mask_'
     fid = fopen('multiply_mask_script','w');
     for i=1:100
-        SUBCMD=['fslmaths mask_clusters_bin -mul ' mask_path ns(i) ' output_' ns(i) '/mask'];
+        SUBCMD=['fslmaths ' char(mask_cluster_bin_path) ' -mul ' mask_path ns(i) ' output_' ns(i) '/mask'];
         fprintf(fid, '%s\n', SUBCMD);
     end
     fclose(fid);
     fprintf(fid0, '%s\n', ['ID=$(' FSLSUBCMD ' -j $ID -t multiply_mask_script)']);
+
+    % 2.2 if data in subspace format, expand the subspace within the mask
+    % if isfield(p, 'is_subspace') && p.is_subspace
+    %     fid = fopen('expand_subspace_script','w');
+    %     for i=1:100
+    %         expand_subspace_cmd = '/home/fs0/qijia/code/fsldev/bin/expand_subspace.py';
+    %         SUBCMD=[PYTHONCMD expand_subspace_cmd '--in --out --mask'];
+    %         fprintf(fid, '%s\n', SUBCMD);
+    %     end
+    %     fclose(fid);
+    %     fprintf(fid0, '%s\n', ['ID=$(' FSLSUBCMD ' -j $ID -t expand_subspace_script)']);
+    % end
 
     % 3. Run the fitting
     fid = fopen('fitting_script','w');

@@ -12,6 +12,7 @@ function include_path(inv)
         fullfile(external_dir, 'fsl', 'etc', 'matlab')
         fullfile(external_dir, 'mapVBVD')
         fullfile(external_dir, 'matlab')
+        fullfile(external_dir, 'CAPRIAModel')
         genpath(root_dir)
     };
 
