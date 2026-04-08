@@ -1,0 +1,191 @@
+#!/bin/bash
+#
+#   Takes 1 mandatory input, the name of the mat file corresponding to the 
+#   pre-processed raw data, 
+
+#   Step 0 - Setup
+
+usage() { STR="\nUsage: $0 [options] <data_mat>\n\n\
+    Options:\n\
+        -j <job id>         Def: None\n\
+        -q <tmean queue>    Def: veryshort.q\n\
+        -r <kernel radius>  Def: 8\n\
+        -t <mask threshold> Def: 0.05\n\
+        -n <no. of jobs>    Def: 256\n\
+        -m <no. of meas>    Def: All\n\
+        -o <output name>    Def: \"sens\"
+        -k <angles file>    Def: data.angles
+        \n\
+    Flags:\n\
+        -s                  Estimate Temporal Mean from Data\n\
+        -d                  2D Mode (Def: 3D)
+        -g                  Use conjugate gradient method\n\
+        -x                  Save temp directories\n\
+        -c                  Compress raw data\n\n"
+    
+printf "$STR" 1>&2; exit 1; }
+
+if [[ $# -eq 0 ]]; then usage; fi
+
+cleanup=1
+njobs=256
+queue="veryshort.q"
+compress=0
+sens_name="sens"
+radius=8
+cg=0
+use_ref=1
+mode="3D"
+ncompress=0
+thresh=0.05
+
+while getopts "j:q:r:n:t:m:o:k:xcgds" opt; do
+    case ${opt} in
+        j)
+            ID="-j ${OPTARG}"
+            ;;
+        q)
+            queue=${OPTARG}
+            ;;
+        r)
+            radius=${OPTARG}
+            ;;
+        t)
+            thresh=${OPTARG}
+            ;;
+        k)
+            angles=${OPTARG}
+            ;;
+        n)
+            njobs=${OPTARG}
+            ;;
+        m)
+            nmeas=${OPTARG}
+            ;;
+        o)
+            sens_name=$(basename ${OPTARG} .mat)
+            ;;
+        s)
+            use_ref=0
+            ;;
+        d)
+            mode="2D"
+            ;;
+        x)
+            cleanup=0
+            ;;
+        c)
+            compress=1
+            ;;
+        g)
+            cg=1
+    esac
+done
+shift $((OPTIND-1))
+
+input=$(basename $1 ".mat")
+sens_name=${input/anat/sens}
+# sens_name="$(basename $1 "anat.mat")sens"
+path=$(dirname $1)
+tempdir=${path}/${input}.${sens_name}
+if [[ ! -d ${tempdir} ]]; then
+    mkdir ${tempdir}
+fi
+if [[ -f ${path}/${input}.info ]]; then
+    source ${path}/${input}.info
+fi
+
+FSLSUBCMD="$FSLDIR/bin/fsl_sub -m n -l ${path}/logs/${input}.${sens_name}"
+MATLABCMD="matlab -nojvm -nosplash -nodisplay -r"
+
+echo $path
+echo $input
+echo $sens_name
+echo $tempdir
+
+if [[ ${use_ref} -ne 0 ]]; then
+    #   Step 2 - Parallelise coil sensitivity computation
+    for i in $(seq 1 ${njobs}); do
+        SUBCMD="\"q=matfile('${path}/${input}');\
+                [s,i,m]=adaptive_estimate_sens('data',q.m,'kernel',[${radius}],'parts',${njobs},'part',$i);\
+                save('${tempdir}/sens_$i','s','i','m','-v7.3');\""
+        if [[ ${i} -eq 1 ]]; then
+            echo $MATLABCMD $SUBCMD > ${tempdir}/${input}_sens_array;
+        else
+            echo $MATLABCMD $SUBCMD >> ${tempdir}/${input}_sens_array;
+        fi
+    done
+    CMD="$FSLSUBCMD -q short.q -t ${tempdir}/${input}_sens_array"
+    ID=$(eval $CMD)
+#   Step 3 - Combine sensitivity data
+    SUBCMD="q=matfile('${path}/${input}');combine_sens('${path}/${sens_name}',${ncompress},'${tempdir}',permute(squeeze(q.m),[4,1,2,3]),${thresh});"
+    CMD="$FSLSUBCMD -j $ID -q short.q -N combine_sens $MATLABCMD \"$SUBCMD\""
+    #ID=$(eval $CMD "\"$SUBCMD\"")
+    ID=$($CMD)
+
+else
+    #   Step 1 - Compute temporal mean data, coil-by-coil
+    for i in $(seq 1 ${ncoils}); do
+        if [[ $cg -ne 0 ]]; then
+            SUBCMD="\"q=matfile('${angles:-${path}/${input}.angles}');\
+                    cg_sens('${path}/${input}.mat',\
+                    '${tempdir}',${i},\
+                    [${dim_x},${dim_y},${dim_z},1],\
+                    (180/pi)*q.angles(1:${nmeas:-${n_blades}*${n_meas}},1), 1E-5);\""
+        else
+            SUBCMD="\"q=matfile('${angles:-${path}/${input}.angles}');\
+                    tmean_sens('${path}/${input}.mat',\
+                    '${tempdir}',${i},\
+                    [${dim_x},${dim_y},${dim_z},1],\
+                    (180/pi)*q.angles(1:${nmeas:-${n_blades}*${n_meas}},1));\""
+        fi
+        echo $MATLABCMD $SUBCMD >> ${tempdir}/${input}_tmean_array
+    done
+    CMD="$FSLSUBCMD ${ID} -q ${queue} -t ${tempdir}/${input}_tmean_array"
+    ID=$(eval $CMD)
+
+    #   Step 2 - Parallelise coil sensitivity computation
+    if [ ${mode} == "3D" ]; then
+    #   3D Mode
+        for i in $(seq 1 ${njobs}); do
+            SUBCMD="\"[s,i]=adaptive_estimate_sens('dir','${tempdir}','kernel',[${radius}],'parts',${njobs},'part',$i);\
+                    save('${tempdir}/sens_$i','s','i','-v7.3');\""
+            echo $MATLABCMD $SUBCMD >> ${tempdir}/${input}_sens_array;
+        done
+    else
+    #   2D Mode, slice-by-slice 
+        for i in $(seq 1 ${dim_z}); do
+            SUBCMD="\"sens=adaptive_estimate_sens('${tempdir}',[${radius}],${njobs},$i);\
+                    save('${tempdir}/sens_$i','s','i','-v7.3');\""
+            echo $MATLABCMD $SUBCMD >> ${tempdir}/${input}_sens_array;
+        done
+    fi
+    CMD="$FSLSUBCMD -j $ID -q veryshort.q -t ${tempdir}/${input}_sens_array"
+    ID=$(eval $CMD)
+
+#   Step 3 - Combine sensitivity data
+    SUBCMD="combine_sens('${path}/${sens_name}',${ncompress},'${tempdir}');"
+    CMD="$FSLSUBCMD -j $ID -q veryshort.q -N combine_sens $MATLABCMD "
+    ID=$(eval $CMD "\"$SUBCMD\"")
+fi
+
+#   Step 4 - Cleanup
+if [[ $cleanup -ne 0 ]]; then
+    CMD="$FSLSUBCMD -j $ID -q veryshort.q -N cleanup rm -rf ${input}.${sens_name}"
+    ID=$(eval $CMD)
+fi
+
+#   Step 5 - Compress raw data
+if [[ $compress -ne 0 ]]; then
+    SUBCMD="saveCompressed('$1','${sens_name}.mat',${ncompress});"
+    CMD="$FSLSUBCMD -j $ID -q bigmem.q -N compress_data $MATLABCMD "
+    ID=$(eval $CMD "\"$SUBCMD\"")
+
+    CMD="$FSLSUBCMD -j $ID -q veryshort.q -N h5repack h5repack ${1} ${1}_tmp"
+    ID=$(eval $CMD)
+
+    CMD="$FSLSUBCMD -j $ID -q veryshort.q -N mv_repack mv ${1}_tmp ${1}"
+    ID=$(eval $CMD)
+fi
+
+echo $ID

@@ -1,0 +1,14 @@
+# ./qsens -n 1000 -t 0.025 -q veryshort.q -o meas_MID00586_FID08235_to_CV_VEPCASL_v0p5_GR_3D_Song_VFAQuad2_9_SI_sens.mat /home/fs0/qijia/scratch/origin_data/cone_dev/phantom/perf_recon_7-4-22/meas_MID00586_FID08235_to_CV_VEPCASL_v0p5_GR_3D_Song_VFAQuad2_9_SI_anat.mat
+# ./qsens -n 1000 -t 0.025 -q veryshort.q -o meas_MID00588_FID08237_qijia_CV_VEPCASL_newgurney_36x48_165hz_176_sens.mat /home/fs0/qijia/scratch/origin_data/cone_dev/phantom/perf_recon_7-4-22/meas_MID00588_FID08237_qijia_CV_VEPCASL_newgurney_36x48_165hz_176_anat.mat
+# ./qsens -n 1000 -t 0.025 -q veryshort.q -o meas_MID00589_FID08238_qijia_CV_VEPCASL_newjohnson_36x48_100hz_176_sens.mat /home/fs0/qijia/scratch/origin_data/cone_dev/phantom/perf_recon_7-4-22/meas_MID00589_FID08238_qijia_CV_VEPCASL_newjohnson_36x48_100hz_176_anat.mat
+
+./qsens -n 100 -t 0.025 -q cuda.q -o meas_MID00841_FID08486_to_CV_VEPCASL_v0p6_36x48_176_100Hz_sens.mat /home/fs0/qijia/scratch/origin_data/cone_dev/phantom/perf_recon_8-4-22/meas_MID00841_FID08486_to_CV_VEPCASL_v0p6_36x48_176_100Hz_anat.mat
+./qsens -n 100 -t 0.025 -q cuda.q -o meas_MID00843_FID08488_qijia_CV_VEPCASL_newgurney_36x48_100hz_176_sens.mat /home/fs0/qijia/scratch/origin_data/cone_dev/phantom/perf_recon_8-4-22/meas_MID00843_FID08488_qijia_CV_VEPCASL_newgurney_36x48_100hz_176_anat.mat
+./qsens -n 500 -t 0.025 -q veryshort.q -o meas_MID00844_FID08489_qijia_CV_VEPCASL_newjohnson_36x48_100hz_176_sens.mat /home/fs0/qijia/scratch/origin_data/cone_dev/phantom/perf_recon_8-4-22/meas_MID00844_FID08489_qijia_CV_VEPCASL_newjohnson_36x48_100hz_176_anat.mat
+
+
+# ./qsens -n 500 -t 0.025 -q short.q -o meas_MID00586_FID08235_to_CV_VEPCASL_v0p5_GR_3D_Song_VFAQuad2_9_SI_sens.mat /home/fs0/qijia/scratch/origin_data/cone_dev/phantom/recon_7-4-22/meas_MID00586_FID08235_to_CV_VEPCASL_v0p5_GR_3D_Song_VFAQuad2_9_SI_anat.mat
+# ./qsens -n 500 -t 0.025 -q veryshort.q -o meas_MID00588_FID08237_qijia_CV_VEPCASL_newgurney_36x48_165hz_176_sens.mat /home/fs0/qijia/scratch/origin_data/cone_dev/phantom/recon_7-4-22/meas_MID00588_FID08237_qijia_CV_VEPCASL_newgurney_36x48_165hz_176_anat.mat
+# ./qsens -n 500 -t 0.025 -q verylong.q -o meas_MID00589_FID08238_qijia_CV_VEPCASL_newjohnson_36x48_100hz_176_sens.mat /home/fs0/qijia/scratch/origin_data/cone_dev/phantom/recon_7-4-22/meas_MID00589_FID08238_qijia_CV_VEPCASL_newjohnson_36x48_100hz_176_anat.mat
+
+# ./qsens -n 500 -t 0.025 -q veryshort.q -o meas_MID00844_FID08489_qijia_CV_VEPCASL_newjohnson_36x48_100hz_176_sens.mat /home/fs0/qijia/scratch/origin_data/cone_dev/phantom/recon_8-4-22/meas_MID00844_FID08489_qijia_CV_VEPCASL_newjohnson_36x48_100hz_176_anat.mat
